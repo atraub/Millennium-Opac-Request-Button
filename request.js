@@ -22,6 +22,8 @@ Pseudo-Code
 
 	Other Statuses:  Direct to ILL/CNY
 
+	Search Results Page:  Include snag for "Request" - does have class of reqLink
+
 */
 
 /* Silly Variables */
