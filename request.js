@@ -4,7 +4,7 @@ Script to hijack Millennium OPAC's "Request Button"
 Redirect to appropriate services
 
 Authored by:  Adam Traub
-Special Thanks to:  Drew Filipski
+Special Thanks to:  Drew Filipski @ https://github.com/snixer724
 
 */
 
