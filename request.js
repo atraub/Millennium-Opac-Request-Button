@@ -28,68 +28,76 @@ Pseudo-Code
 
 /* Silly Variables */
 
+var $j = jQuery.noConflict();
+
 var newLink = "nope";
 var dueDate, ddDay, ddMonth, ddYear, todayDate, millisPerDay, millisBetween, daysBetween;
 var bibTitle, bibDate, bibISBN, bibAuLast, bibPublisher;
 
 bibTitle = "test";  //debugging
 
-if ($(".bibPager")[0]){
-	bibTitle = $(".bibDisplayTitle:first .bibInfoData").text().split("/",1);
-	bibAuLast = $(".bibDetail:first .bibInfoData").text().split(","1);
-	//bibDate = 
-	bibISBN = $(".bibDisplayContentMore .bibInfoData:first").text();
-} else {
-	bibTitle = $(".briefcitTitle a").text();
-	bibISBN = $("[name='gbs']").text();
-}
+$j(window).load(function() {
 
-console.log(bibAuLast);
-console.log(bibTitle);
-console.log(bibISBN);
-
-/* Date Magic */
-
-if($("td:contains('HOLD')").text()){
-
-	newLink = "https://ill.rit.edu/illiad/illiad.dll/OpenURL?sid=ritcatalog&genre=book&title=" + encodeURI(bibTitle) + "&atitle=&volume=&part=&issue=&date=&spage=&epage=&isbn=" + encodeURI(bibISBN) + "&aulast=&aufirst=&espnumber=&LoanPublisher=&LoanPlace=&LoanEdition="; //GO TO ILL/CNY
-
-} else if($("td:contains('DUE')").text()){
-
-	dueDate = $("td:contains('DUE')").text().trim().replace("DUE ", "");
-	ddMonth = dueDate.split("-")[0]-1; //Base 0
-	ddDay = dueDate.split("-")[1];
-	ddYear = 20+dueDate.split("-")[2]; //Concatenating "20" to make base year 2000
-
-	dueDate = new Date(ddYear,ddMonth,ddDay);
-	todayDate = new Date();
-
-	console.log(dueDate);
-	console.log(todayDate);
-
-	/* 
-		Days between method from:
-			http://stackoverflow.com/questions/1036742/date-difference-in-javascript-ignoring-time-of-day
-	*/
-
-	dueDate = Date.UTC(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate());
-	todayDate = Date.UTC(todayDate.getFullYear(), todayDate.getMonth(), todayDate.getDate());
-
-	daysBetween = Math.abs(dueDate-todayDate)/1000/60/60/24;
-
-	console.log(daysBetween);
-
-	if(daysBetween > 4){
-		newLink = "https://ill.rit.edu/illiad/illiad.dll/OpenURL?sid=ritcatalog&genre=book&title=" + encodeURI(bibTitle) + "&atitle=&volume=&part=&issue=&date=&spage=&epage=&isbn=" + encodeURI(bibISBN) + "&aulast=&aufirst=&espnumber=&LoanPublisher=&LoanPlace=&LoanEdition="; //GO TO ILL/CNY
+	if ($j(".bibPager").length){
+		bibTitle = $j(".bibDisplayTitle:first .bibInfoData").text().split("/",1);
+		//bibAuLast = $j(".bibDetail:first .bibInfoData").text().split(","1);
+		//bibDate = 
+		bibISBN = $j(".bibDisplayContentMore .bibInfoData:first").text();
+	} else if($j("tr .reqLink")){
+		//$j(".briefcitCell").each
 	}
-}
+
+	console.log(bibTitle);
+	console.log(bibISBN);
+
+	/* Date Magic */
+
+	if($j("td:contains('HOLD')").text()){
+
+		newLink = "https://ill.rit.edu/illiad/illiad.dll/OpenURL?sid=ritcatalog&genre=book&title=" + encodeURI(bibTitle) + "&atitle=&volume=&part=&issue=&date=&spage=&epage=&isbn=" + encodeURI(bibISBN) + "&aulast=&aufirst=&espnumber=&LoanPublisher=&LoanPlace=&LoanEdition="; //GO TO ILL/CNY
+
+	} else if($j("td:contains('DUE')").text()){
+
+		dueDate = $j("td:contains('DUE')").text().trim().replace("DUE ", "");
+		ddMonth = dueDate.split("-")[0]-1; //Base 0
+		ddDay = dueDate.split("-")[1];
+		ddYear = 20+dueDate.split("-")[2]; //Concatenating "20" to make base year 2000
+
+		dueDate = new Date(ddYear,ddMonth,ddDay);
+		todayDate = new Date();
+
+		console.log(dueDate);
+		console.log(todayDate);
+
+		/* 
+			Days between method from:
+				http://stackoverflow.com/questions/1036742/date-difference-in-javascript-ignoring-time-of-day
+		*/
+
+		dueDate = Date.UTC(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate());
+		todayDate = Date.UTC(todayDate.getFullYear(), todayDate.getMonth(), todayDate.getDate());
+
+		daysBetween = Math.abs(dueDate-todayDate)/1000/60/60/24;
+
+		console.log(daysBetween);
+
+		if(daysBetween > 4){
+			newLink = "https://ill.rit.edu/illiad/illiad.dll/OpenURL?sid=ritcatalog&genre=book&title=" + encodeURI(bibTitle) + "&atitle=&volume=&part=&issue=&date=&spage=&epage=&isbn=" + encodeURI(bibISBN) + "&aulast=&aufirst=&espnumber=&LoanPublisher=&LoanPlace=&LoanEdition="; //GO TO ILL/CNY
+		}
+	}
 
 
-/* Link Switching Magic */
+	/* Link Switching Magic */
 
-if(newLink != "nope"){
-	$("[href*='request~']").attr("href", newLink);  //Changes link on individual display page
-	$("[href*='requestbrowse~']").attr("href", newLink);  //Changes link on search results page
+	if(newLink != "nope"){
+		$j("[href*='request~']").attr("href", newLink);  //Changes link on individual display page
+		$j("[href*='requestbrowse~']").attr("href", newLink);  //Changes link on search results page
+	}
+
+	/* Debugging Magic */
 
 	console.log(newLink);
-}
+	console.log(bibTitle);
+	console.log(bibISBN);
+
+});
