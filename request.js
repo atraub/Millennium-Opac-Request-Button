@@ -22,7 +22,7 @@ Pseudo-Code
 
 	Other Statuses:  Direct to ILL/CNY
 
-	Search Results Page:  Include snag for "Request" - does have class of reqLink
+	ILL Sample Link:  https://ill.rit.edu/illiad/illiad.dll/OpenURL?sid=info%3Asid%2Fsersol%3ARefinerQuery&genre=book&title=The+hobbit%2C+or%2C+There+and+back+again+%2F+by+J.R.R.+Tolkien&atitle=&volume=&part=&issue=&date=&spage=&epage=&isbn=9780618002214&aulast=&aufirst=&espnumber=&LoanPublisher=&LoanPlace=&LoanEdition=
 
 */
 
@@ -30,12 +30,29 @@ Pseudo-Code
 
 var newLink = "nope";
 var dueDate, ddDay, ddMonth, ddYear, todayDate, millisPerDay, millisBetween, daysBetween;
+var bibTitle, bibDate, bibISBN, bibAuLast, bibPublisher;
+
+bibTitle = "test";  //debugging
+
+if ($(".bibPager")[0]){
+	bibTitle = $(".bibDisplayTitle:first .bibInfoData").text().split("/",1);
+	bibAuLast = $(".bibDetail:first .bibInfoData").text().split(","1);
+	//bibDate = 
+	bibISBN = $(".bibDisplayContentMore .bibInfoData:first").text();
+} else {
+	bibTitle = $(".briefcitTitle a").text();
+	bibISBN = $("[name='gbs']").text();
+}
+
+console.log(bibAuLast);
+console.log(bibTitle);
+console.log(bibISBN);
 
 /* Date Magic */
 
 if($("td:contains('HOLD')").text()){
 
-	newLink = "http://ill.rit.edu"; //GO TO ILL/CNY
+	newLink = "https://ill.rit.edu/illiad/illiad.dll/OpenURL?sid=ritcatalog&genre=book&title=" + encodeURI(bibTitle) + "&atitle=&volume=&part=&issue=&date=&spage=&epage=&isbn=" + encodeURI(bibISBN) + "&aulast=&aufirst=&espnumber=&LoanPublisher=&LoanPlace=&LoanEdition="; //GO TO ILL/CNY
 
 } else if($("td:contains('DUE')").text()){
 
@@ -63,7 +80,7 @@ if($("td:contains('HOLD')").text()){
 	console.log(daysBetween);
 
 	if(daysBetween > 4){
-		newLink = "http://ill.rit.edu"; //GO TO ILL/CNY
+		newLink = "https://ill.rit.edu/illiad/illiad.dll/OpenURL?sid=ritcatalog&genre=book&title=" + encodeURI(bibTitle) + "&atitle=&volume=&part=&issue=&date=&spage=&epage=&isbn=" + encodeURI(bibISBN) + "&aulast=&aufirst=&espnumber=&LoanPublisher=&LoanPlace=&LoanEdition="; //GO TO ILL/CNY
 	}
 }
 
@@ -71,5 +88,8 @@ if($("td:contains('HOLD')").text()){
 /* Link Switching Magic */
 
 if(newLink != "nope"){
-	$("[href*='request~']").attr("href", newLink);
+	$("[href*='request~']").attr("href", newLink);  //Changes link on individual display page
+	$("[href*='requestbrowse~']").attr("href", newLink);  //Changes link on search results page
+
+	console.log(newLink);
 }
