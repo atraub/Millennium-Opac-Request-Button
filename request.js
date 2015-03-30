@@ -30,7 +30,7 @@ Pseudo-Code
 
 var $j = jQuery.noConflict();
 
-var newLink = "nope";
+var newLink = "nope";  //debugging
 var dueDate, ddDay, ddMonth, ddYear, todayDate, millisPerDay, millisBetween, daysBetween;
 var bibTitle, bibDate, bibISBN, bibAuLast, bibPublisher;
 
@@ -43,8 +43,10 @@ $j(window).load(function() {
 		//bibAuLast = $j(".bibDetail:first .bibInfoData").text().split(","1);
 		//bibDate = 
 		bibISBN = $j(".bibDisplayContentMore .bibInfoData:first").text();
-	} else if($j("tr .reqLink")){
-		//$j(".briefcitCell").each
+	} else if($j("tr.reqLink")){
+		bibTitle = $j(".reqLink").closest(".briefcitDetailMain").children(".briefcitTitle").text();
+		bibTitle = bibTitle.split(" / ",1);
+		bibISBN = $j(".reqLink").closest(".briefcitDetailMain").children(".gbs").text();
 	}
 
 	console.log(bibTitle);
