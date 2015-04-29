@@ -1,0 +1,75 @@
+/* 
+    Document   : gist
+    Created on : Nov 21, 2013, 1:01:23 PM
+    Author     : gjrwcs
+    Description:
+        Styling for GIST Availibilty Checker
+*/
+
+div.ac-resp {
+	font-family: arial;
+	max-width: 600px;
+}
+div.ac-record {
+	margin-bottom: 5px;
+	border-radius: 10px;
+	position: relative;
+}
+div.ac-resp label {
+	font-weight: bold;
+	color: #333;
+	padding: 3px 0 1px 8px;
+	display: block;
+	background: #eee;
+	font-size: 100%;
+}
+div.ac-record a, div.ac-resp a {
+	color: #3269BA !important;
+	text-decoration: underline;
+}
+div.ac-record a.multiple {
+	display: block;
+	font-size: 90%;
+	padding: 10px;
+	border-top: 1px #aaa solid;
+	font-style: italic;
+	background: #eff6fe;
+}
+div.ac-record table {
+	width: 100%;
+	font-size: 12px;
+	overflow: hidden;
+	border-spacing: 0;
+	border-top: 1px #ccc solid;
+}
+div.ac-record tr:first-child td {
+	padding: 7px 7px 0;
+	color: #999;
+	font-style: italic;
+	font-weight: normal;
+}
+div.ac-record td {
+	padding: 0px 7px 7px;
+	background: transparent;
+	border-spacing: 0;
+	width: 33%;
+	margin-bottom: 1px;
+	font-weight: bold;
+}
+
+
+div.ac-local {
+
+}
+div.ac-local label:before {
+	content: "Held By ";
+	font-weight: bold;
+}
+
+div.ac-unavail td, div.ac-unavail tr:first-child td {
+	background: transparent;
+	color: #999;
+}
+span.alt-libs {
+	font-size: 12px;
+}
