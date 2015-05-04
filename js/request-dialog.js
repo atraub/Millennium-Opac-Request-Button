@@ -298,36 +298,72 @@ function authCallback(data) {
     if(data.reqId)
     {
         var reqDialog = window[data.reqId];
+        $j('.ira-status').attr("class","ira-status");
         
         switch(data.status)
-    {
-        case "no credentials":
-        case "invalid credentials":
-            $j("#ira-processing-indicator").hide();
-            $j(".ira-req-button").show();
-            $j("#ira-auth-form").show();
+        {
+            case "no credentials":
+            case "invalid credentials":
+                $j("#ira-processing-indicator").hide();
+                $j(".ira-req-button").show();
+                $j("#ira-auth-form").show();
 
-            $j(".ira-status").html("Invalid Username and Password Combination").show();
-            break;
-        case "authenticated":
-            $j(".ira-status").html("Authenticated! Processing request...").show();
-            
-            reqDialog.GenerateRequest();
-            break;
-        default:
-            $j(".ira-status").html("An unexpected error occured. If this issue persists, please notify us.").show();
-            break;
+                $j(".ira-status").html("Invalid Username and Password Combination")
+                    .addClass("error")
+                    .show();
+                break;
+            case "authenticated":
+                $j(".ira-status").html("Authenticated! Processing request...").show();
+
+                reqDialog.GenerateRequest();
+                break;
+            default:
+                $j(".ira-status")
+                    .html("An unexpected error occured. If this issue persists, please notify us.")
+                    .addClass("error")
+                    .show();
+                break;
+        }
     }
-    }
-    
-    
-    
-   
 }
 
 function requestCallback(data) {
+    $j("#ira-processing-indicator").hide();
+    $j(".ira-status")
+        .attr("class","ira-status")
+        .addClass("result");
     switch(data.status)
     {
-
+        case "complete":
+            
+            $j(".ira-status")
+                .html("Request Sent via " + data.system + ".")
+                .addClass("success")
+                .append(
+                $j("<p>")
+                    .text("You will recieve an email notification when your item has arrived, and can be picked from the Circulation Desk."));
+            
+            if(data.requestURL)
+            {
+                $j('.ira-status').append(
+                    $j("<p>")
+                        .html("Request can be reviewed at: ")
+                        .append(
+                        $j("<a>")
+                            .html(data.requestURL)
+                            .attr("target","_blank")
+                            .attr("href", data.requestURL)));
+            }
+            break;
+        case "error":
+            $j('.ira-status')
+                .html("An error has occured creating your request: " + data.error + " If this issue persists please contact the system administrator.")
+                .addClass("error");
+            break;
+        default:
+            $j(".ira-status")
+                .html("An unexpected error has occured. Please contact the system administrator is this issue persists")
+                .addClass("error");
+            break;
     }
 }

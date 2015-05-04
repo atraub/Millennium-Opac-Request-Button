@@ -58,7 +58,7 @@
     padding: 2em;
 }
 .ira-dialog a {
-    color: #f36e24;   
+    color: #f36e24;
 }
 .ira-dialog-content p {
     padding: .75em 0;
@@ -66,11 +66,25 @@
     font-size: 1em;
     text-align: left;
 }
-.ira-dialog form {
+.ira-dialog form, .ira-status.result {
     text-align: left;
     background: #eee;
     padding: 1em 0 0;
     border: 1px #ccc solid;
+}
+.ira-status.result {
+    padding: 1em;
+    font-weight: bold;
+}
+.ira-status.success {
+    background: rgb(200,235,200);
+}
+.ira-status.error {
+    color: #500;
+    font-weight: bold;
+}
+.ira-status p {
+    font-weight: normal;
 }
 .ira-dialog label {
     font-weight: bold;
