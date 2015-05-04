@@ -138,7 +138,7 @@ RequestDialog.prototype.Init = function(){
                     //scope event variables
                     var servicePath = this.servicePath;
                     
-                    //Yields: Available from # librar(y|ies) in the (CNY/NEX/...) network(s), with an estimated fulfillment of 7-12* business days. View Full Availibility Information
+                    //Yields: Available from # other (CNY/NEX/...) librar(y|ies), in about 7-10 days. View Full Availibility Information
                     $j("#ira-processing-indicator").before(
                         $j("<p>").html("Available from <b>" + ar.libraryCount + "</b> other " + ar.registeredTags.join("/").toUpperCase() + " librar" + libraryPlurality + ", in about <span class='fullfillment-disclaimer'>7-10</span> days. ")
                             .append(
@@ -146,10 +146,10 @@ RequestDialog.prototype.Init = function(){
                                 $j("<a>")
                                 .html("View Full Availibility Information")
                                 .attr("target","_blank")
-                                .attr("href", "javascript:void(0)"))
+                                .attr("href", "javascript:void(0)")
                                 .click(function(){
                                     window.open(servicePath + "itemAvailibility.php?isbn=" + isbn + "&title=" + encodeURI(reqDialog.itemTitle), "Item Availibility: " + reqDialog.itemTitle, "width=600, height= 800, location=no");
-                                }));
+                                })));
                 }
                 //If it wasn't found anywhere, it will be request through Interlibrary Loan
                 else {
@@ -202,7 +202,14 @@ RequestDialog.prototype.Init = function(){
                                 .attr("type","button")
                                 .html("Request Item")
                                 .addClass("ira-req-button")
-                                .click($j.proxy(reqDialog.AuthUser, reqDialog))))
+                                .click($j.proxy(reqDialog.AuthUser, reqDialog))));
+                $j(".ira-dialog-content input").keyup(function(e){
+                    if(e.keyCode == 13)
+                    {
+                        $j(".ira-req-button").click();
+                        $j(this).focus();
+                    }
+                });
             },
             isbn: this.isbn
         });
