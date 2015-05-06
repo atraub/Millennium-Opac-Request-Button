@@ -250,6 +250,7 @@ function ILLiadRequest($isbn)
             if(!empty($transactionID))
             {
                 $ret['requestURL'] = "https://ill.rit.edu/ILLiad/illiad.dll?Action=10&Form=63&Value=" . $transactionID;
+                $ret['requestURL'] = "https://ill.rit.edu/ILLiad/illiad.dll?Action=99";
                 $ret['status'] = "complete";
             }
             else {
