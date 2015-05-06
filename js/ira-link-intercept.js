@@ -1,5 +1,5 @@
 /*
-Script to hijack Millennium OPAC's "Request Button"
+Script to intercept Millennium OPAC's "Request Button"
 Redirect to appropriate services
 Author: Greg Rozmarynowycz
 Adapted from: Adam Traub
@@ -14,10 +14,6 @@ Pseudo-Code
             Less Than 4 Days:  Direct to Millennium Hold
             4 or More Days:  Direct to Item Requestion Aggregation
             Holds Present:  Direct to Item Requestion Aggregation
-		
-		FUTURE CONSIDERATION:  If checked out to ILL Patron, just ILL/CNY
-	Other Statuses:  Direct to ILL/CNY
-	ILL Sample Link:  https://ill.rit.edu/illiad/illiad.dll/OpenURL?sid=info%3Asid%2Fsersol%3ARefinerQuery&genre=book&title=The+hobbit%2C+or%2C+There+and+back+again+%2F+by+J.R.R.+Tolkien&atitle=&volume=&part=&issue=&date=&spage=&epage=&isbn=9780618002214&aulast=&aufirst=&espnumber=&LoanPublisher=&LoanPlace=&LoanEdition=
 */
 
 var $j = jQuery.noConflict();
@@ -31,11 +27,11 @@ $j(document).ready(function() {
     //don't go any further if there's no request links to intercept
     if(requestLinks && requestLinks.length > 0)
     {
-        debugLog("req-links");
+        console.log("req-links");
         //if we have search result cells, intercept the indivual links
         if(recordCells && recordCells.length > 0)
         {
-            debugLog(recordCells);
+            console.log(recordCells);
             $j(recordCells).each(function(){
                 //extract record info
                 var isbn = $j(".gbs", this).text().trim().split(" ", 1)[0];
@@ -52,7 +48,7 @@ $j(document).ready(function() {
         }
         //otherwise this is a record page and we need can search the whole thing
         else {
-            debugLog("single-page");
+            console.log("single-page");
             //extract info
             var isbn = $j(".bibDisplayContentMore .bibInfoData:first").text();
             var title = $j(".bibDisplayTitle:first .bibInfoData").text().split("/",1);
@@ -67,18 +63,9 @@ $j(document).ready(function() {
    
 });
 
-function debugLog(statement)
-{
-    var logStatus = true;
-    if(logStatus)
-    {
-        console.log(statement);   
-    }
-}
-
 function interceptLink(context, isbn, title)
 {
-    debugLog("checking local item availibility");
+    console.log("checking local item availibility");
     var altLink = "https://ill.rit.edu/illiad/illiad.dll/OpenURL?sid=ritcatalog&genre=book&title=" + encodeURI(title) + "&atitle=&volume=&part=&issue=&date=&spage=&epage=&isbn=" + encodeURI(isbn) + "&aulast=&aufirst=&espnumber=&LoanPublisher=&LoanPlace=&LoanEdition=";
 
 	//Determine how far in the future the material is due
@@ -121,7 +108,7 @@ function interceptLink(context, isbn, title)
 
         //If the material won't be avialable for more than 4 days (or is already on HOLD)
         if($j("td:contains('HOLD')", context).text() || minRemainingDays > 4 ){
-            debugLog("intercepting links");
+            console.log("intercepting links");
             $j("[href*='request~'], [href*='requestbrowse~']", context).mouseup(function(){
 
                 console.log(isbn + " " +  title);
