@@ -11,16 +11,14 @@ Special Thanks to:  Drew Filipski @ https://github.com/snixer724
 Pseudo-Code
 	Checked Out:
 		No Holds Present:  
-			Less Than 5 Days:  Direct to Millennium Hold
-			5 or More Days:  Direct to ILL/CNY
-		Holds Present:  Direct to ILL/CNY
+            Less Than 4 Days:  Direct to Millennium Hold
+            4 or More Days:  Direct to Item Requestion Aggregation
+            Holds Present:  Direct to Item Requestion Aggregation
 		
 		FUTURE CONSIDERATION:  If checked out to ILL Patron, just ILL/CNY
 	Other Statuses:  Direct to ILL/CNY
 	ILL Sample Link:  https://ill.rit.edu/illiad/illiad.dll/OpenURL?sid=info%3Asid%2Fsersol%3ARefinerQuery&genre=book&title=The+hobbit%2C+or%2C+There+and+back+again+%2F+by+J.R.R.+Tolkien&atitle=&volume=&part=&issue=&date=&spage=&epage=&isbn=9780618002214&aulast=&aufirst=&espnumber=&LoanPublisher=&LoanPlace=&LoanEdition=
 */
-
-/* Silly Variables */
 
 var $j = jQuery.noConflict();
 
@@ -84,50 +82,62 @@ function interceptLink(context, isbn, title)
     var altLink = "https://ill.rit.edu/illiad/illiad.dll/OpenURL?sid=ritcatalog&genre=book&title=" + encodeURI(title) + "&atitle=&volume=&part=&issue=&date=&spage=&epage=&isbn=" + encodeURI(isbn) + "&aulast=&aufirst=&espnumber=&LoanPublisher=&LoanPlace=&LoanEdition=";
 
 	//Determine how far in the future the material is due
-    var daysBetween = 0;
-    var dueDate = $j("td:contains('DUE')", context).text().trim();
+    var minRemainingDays = 0;
     
-	if(dueDate){
-        var dueStamp;
-        
-        //extract due date 
-        //if browsers that support it (chrome), automatically extract timestamp
-        if(!(dueStamp = new Date(dueDate).valueOf()))
-        {
-            //for browsers that aren't chrome...
-            //split up pieces (dd-mm-yy)
-            var datePcs = dueDate.replace("DUE ", "").split("-");
-            
-            var dueMo = datePcs[0];
-            var dueDay = datePcs[1];
-            var dueYr = "20" + datePcs[2];
-            
-            //generate date obj and get timestamp
-            var dueStamp = new Date(dueYr, dueMo, dueDay).valueOf();
-        }
-        
-		daysBetween = Math.ceil((dueStamp - Date.now())/1000/60/60/24);
-	}
-    
-    //If the material won't be avialable for more than 4 days (or is already on HOLD)
-    if($j("td:contains('HOLD')", context).text() || daysBetween > 4 ){
-        debugLog("intercepting links");
-		$j("[href*='request~'], [href*='requestbrowse~']", context).mouseup(function(){
+    //Millenium generates request links for any item where at least on copy is unavailabe, even it there are copies available 
+    if($j("td:contains('AVAILABLE')", context).length > 0)
+    {
+        console.log("hiding unecessary link for: " + isbn);
+        $j("[href*='request~'], [href*='requestbrowse~']", context).hide();
+    }
+    else {
+        //loop through each copy of the item, and calculate the minimum wait time
+        $j("td:contains('DUE')", context).each(function(){
+            var dueDate = $j(this).text().trim();
 
-            console.log(isbn + " " +  title);
-            var requestDialog = new RequestDialog({
-                cssPath: "http://librarydev.rit.edu/depts/assets/AlbertIRA/css/",
-                servicePath: "https://librarydev.rit.edu/depts/assets/AlbertIRA/",
-                isbn: isbn,
-                itemTitle: title
-            });
-            requestDialog.ShowDialog();
-            requestDialog.Init();
-            
-            
-        }).click(function(){
-            return false; 
+            if(dueDate){
+                var dueStamp;
+
+                //extract due date 
+                //if browsers that support it (chrome), automatically extract timestamp
+                if(!(dueStamp = new Date(dueDate).valueOf()))
+                {
+                    //split up pieces (dd-mm-yy)
+                    var datePcs = dueDate.replace("DUE ", "").split("-");
+
+                    var dueMo = datePcs[0],
+                        dueDay = datePcs[1],
+                        dueYr = "20" + datePcs[2];
+
+                    //generate date obj and get timestamp
+                    var dueStamp = new Date(dueYr, dueMo, dueDay).valueOf();
+                }
+
+                //determines the minimum wait time if there multiple copies
+                var remainingDays = Math.ceil((dueStamp - Date.now())/1000/60/60/24);
+                minRemainingDays = Math.min(minRemainingDays || Number.MAX_VALUE, remainingDays);
+           }
         });
 
+        //If the material won't be avialable for more than 4 days (or is already on HOLD)
+        if($j("td:contains('HOLD')", context).text() || minRemainingDays > 4 ){
+            debugLog("intercepting links");
+            $j("[href*='request~'], [href*='requestbrowse~']", context).mouseup(function(){
+
+                console.log(isbn + " " +  title);
+                var requestDialog = new RequestDialog({
+                    cssPath: "http://librarydev.rit.edu/depts/assets/AlbertIRA/css/",
+                    servicePath: "https://librarydev.rit.edu/depts/assets/AlbertIRA/",
+                    isbn: isbn,
+                    itemTitle: title
+                });
+                requestDialog.ShowDialog();
+                requestDialog.Init();
+
+
+            }).click(function(){
+                return false; 
+            });
+        }
 	}
 }
