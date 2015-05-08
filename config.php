@@ -3,7 +3,9 @@
 //Info about local library
 $local = array(
     "id" => "rit",
-    "search_url" => "",
+    "institution" => "RIT",
+    "lib_name" => "Wallace Library",
+    "search_url" => "http://albert.rit.edu/search/i?SEARCH=$1",
     //request varialbes
     "campus_id" => "rit9",
     "req_location" => "wcirc",
@@ -15,8 +17,11 @@ $systems = array(
      * abbr:            3-4 letter abbreviation, this will be displayed to user
      * name:            Full Name of Service
      * search_url:      Catalog search URL format, indicating the position of item ISBN with $1
-     * request_url:     Request URL format, indicating the position of item ISBN with $1
-     * request_method:  "millenium", or the key to a custom defined request method
+     * request_url:     Request URL format, indicating the position of item ISBN with $1 (must be secured with SSL)
+     * fulfillment:     Number of days the request is expected to take to be completed
+     * request_method:  "millenium", or the key to a custom defined request method (only millenium systems can be checked for availibility)
+     * fallback:        Indicates which system should be used if the item is not found or if a request fails
+     * info_url:        (Only for fallback) URL where user can get more information about the service
      */
     
     //key must be the same as the abbreviation
@@ -25,6 +30,7 @@ $systems = array(
         "name" => "Connect NY",
         "search_url" => "http://connectny.info/search~S0/?searchtype=i&searcharg=$1",
         "request_url" => "https://connectny.info/search~S0?/i$1/i$1/1,1,1,B/request&FF=i$1&1,1,",
+        "fulfillment" => "7-10",
         "request_method" => "millenium"
         ),
     "nex" => array(
@@ -32,19 +38,23 @@ $systems = array(
         "name" => "New England Express",
         "search_url" => "http://nexp.iii.com/search~S3?/i$1/i$1/1,1,1,E/detlframeset&FF=i$1&1,1,",
         "request_url" => "https://nexp.iii.com/search~S3?/i$1/i$1/1%2C1%2C1%2CE/request&FF=i$1&1%2C1%2C",
+        "fulfillment" => "7-10",
         "request_method" => "millenium"
         ),
     "ill" => array(
-        "abbr" => "nex",
-        "name" => "IDS Illiad",
+        "abbr" => "ill",
+        "name" => "InterLibrary Loan",
         "request_method" => "illiad",
+        "info_url" => "https://ill.rit.edu/ILLiad/Logon.html",
+        "fulfillment" => "3-7",
         "fallback" => true
         )
     );
 
 
 /*This array defines alternate functions to request materials*/
-$altRequestMethods = array(
+$customRequestMethods = array(
+    /*Authenticates and creates request with the RIT IDS Illiad portal*/
     "illiad" => function($isbn) {
         global $ret;
     
@@ -53,133 +63,76 @@ $altRequestMethods = array(
          */
         $ILLAuthenticateURL = "https://ill.rit.edu/ILLiad/illiad.dll?Action%3D99";
         $requestURL = "https://ill.rit.edu/ILLiad/illiad.dll?Action=10&Form=20&Value=GenericRequestGIST";
-
-        $curl_options = array(
-            CURLOPT_RETURNTRANSFER => true,     /* return web page */
-            CURLOPT_HEADER         => true,     /* don't return headers */
-            CURLOPT_FOLLOWLOCATION => true,     /* follow redirects */
-            CURLOPT_ENCODING       => "",       /* handle all encodings */
-            CURLOPT_AUTOREFERER    => true,     /* set referer on redirect */
-            CURLOPT_CONNECTTIMEOUT => 120,      /* timeout on connect */
-            CURLOPT_TIMEOUT        => 120,      /* timeout on response */
-            CURLOPT_MAXREDIRS      => 10,       /* stop after 10 redirects */
-            CURLOPT_SSL_VERIFYHOST => 0,
-            CURLOPT_SSL_VERIFYPEER => 0,
-            CURLOPT_COOKIEJAR      => "cookie.txt",
-            //were going to be acting as a Firefox client to eliminate any possible issues
-            CURLOPT_USERAGENT      => 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:31.0) Gecko/20100101 Firefox/31.0'
-        );
-
-        $ch = curl_init();
-        curl_setopt_array($ch, $curl_options);
+        
+        //Open a cURL request
+        $ch = openCURLRequest();
 
         /*
          * Authenticate with the ILL Server
          */
-        $fields = array();
-        $fields['ILLiadForm'] = "Logon";
-        $fields['Username'] = $_REQUEST['user'];
-        $fields['Password'] = $_REQUEST['password'];
-        $fields['SubmitButton'] = "Logon to ILLiad";    //This is crucial to making a successful request
-
-        //Setup Headers 
-        curl_setopt($ch, CURLOPT_URL, $ILLAuthenticateURL);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-            'Connection: keep-alive',
-            'Content-Type: application/x-www-form-urlencoded',
-            'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language: en-US,en;q=0.5',
-            'Accept-Encoding: gzip, deflate'
-        ));
-        curl_setopt($ch, CURLOPT_REFERER, $ILLAuthenticateURL);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($fields));
-        //curl_setopt($ch, CURLINFO_HEADER_OUT, true);
-
-        $result = curl_exec($ch);
-
-        //$headers = curl_getinfo($ch, CURLINFO_HEADER_OUT);
-        //echo http_build_query($fields);
-        //echo "Request Headers: " . $headers;
-
-        /*
-         * Extract the sessionID cookie from the headers
-         */
-        //Get the string of cookies from headers
-        $cookieMatches;
-        preg_match_all('/^Set-Cookie:(.*)/im', $result, $cookieMatches);
-        //var_dump($cookieMatches);
-        $cookieString = $cookieMatches[1][0];
-
-        //extract the cookie kes and values
-        $rawCookies;
-        preg_match_all('/(\s?([^;]+)=([^;]+);?)/i', $cookieString, $rawCookies);
-
-        //make an associative array of the cookies
-        $cookies = array();
-        for($c = 0; $c < count($rawCookies[2]); $c++)
-        {
-            $cookies[$rawCookies[2][$c]] = $rawCookies[3][$c];
-        }
+        $fields = array(
+            'ILLiadForm' => "Logon",
+            'Username' => $_REQUEST['user'],
+            'Password' => $_REQUEST['password'],
+            'SubmitButton' => "Logon to ILLiad" //This is crucial to making a successful ILL request
+        );    
+        
+        $result = CURLPost($ch, $ILLAuthenticateURL, $fields);
+        
         //capture the sessionID
+        $cookies = extractCookies($result);
         $ILLsessionID = $cookies['ILLiadSessionID'];
-
-        //echo $ILLsessionID;
-        //var_dump($cookies);
-        //echo $result;
 
         /*
          * Perform Item Request
          */
         if(!empty($ILLsessionID)) {
-            //Authentication Fields (hidden)
-            $fields = array();
-            $fields['ILLiadForm'] = "GenericRequestGIST";
-            $fields['Username'] = $_REQUEST['user'];
-            $fields['SessionID'] = $ILLsessionID;
+            
+            $fields = array(
+                //Authentication Fields
+                'ILLiadForm' => "GenericRequestGIST",
+                'Username' => $_REQUEST['user'],
+                'SessionID' => $ILLsessionID,
 
-            //Hidden fields
-            $fields['RequestType'] = "Loan";
-            $fields['CallNumer'] = "";
-            $fields['GISTWeb.Group3Libraries'] = "";
-            $fields['GISTWeb.Group2Libraries'] = "";
-            $fields['GISTWeb.FullTextURL'] = "";
-            $fields['GISTWeb.LocallyHeld'] = "no";
-            $fields['GISTWeb.AmazonPrice'] = "";
-            $fields['GISTWeb.BetterWorldBooksPrice'] = "";
-            $fields['EPSNumber'] = "";
-            $fields['GISTWEb.Delivery'] = "Hold at Service Desk";
-            $fields['CitedIn'] = "";
+                //Hidden fields
+                'RequestType' => "Loan",
+                'CallNumer' => "",
+                'GISTWeb.Group3Libraries' => "",
+                'GISTWeb.Group2Libraries' => "",
+                'GISTWeb.FullTextURL' => "",
+                'GISTWeb.LocallyHeld' => "no",
+                'GISTWeb.AmazonPrice' => "",
+                'GISTWeb.BetterWorldBooksPrice' => "",
+                'EPSNumber' => "",
+                'GISTWEb.Delivery' => "Hold at Service Desk",
+                'CitedIn' => "",
 
-            //Item information
-            $fields['LoanTitle'] = "";
-            $fields['LoanAuthor'] = "";
-            $fields['LoanPublisher'] = "";
-            $fields['LoanDate'] = "";
-            $fields['LoanEdition'] = "";
-            $fields['DocumentType'] = "Book";
-            //$fields['ISSN'] = $isbn;
+                //Item information
+                'LoanTitle' => "",   
+                'LoanAuthor' => "",
+                'LoanPublisher' => "",
+                'LoanDate' => "",
+                'LoanEdition' => "",
+                'DocumentType' => "Book",
+                //'ISSN' = $isbn;
 
-            //Request Information
-            $fields['CitedPages'] = "No";
-            $fields['NotWantedAfter'] = date("m/D/Y", time() + 3600 * 24 * 60);
-            $fields['GISTWEb.PurchaseRecommendation'] = "no";
-            $fields['AcceptNonEnglish'] = "No";
-            $fields['AcceptAlternateEditition'] = "Yes";
-            $fields['GISTWeb.AlternativeFormat'] = "No";
-            $fields['GISTWeb.Importance'] = "Unsure";
-            $fields['Notes'] = "TEST REQUEST - Generated through Albert Item Request Aggregation";
+                //Request Information
+                'CitedPages' => "No",
+                'NotWantedAfter' => date("m/D/Y", time() + 3600 * 24 * 60),
+                'GISTWEb.PurchaseRecommendation' => "no",
+                'AcceptNonEnglish' => "No",
+                'AcceptAlternateEditition' => "Yes",
+                'GISTWeb.AlternativeFormat' => "No",
+                'GISTWeb.Importance' => "Unsure",
+                'Notes' => "TEST REQUEST - Generated through Albert Item Request Aggregation",
 
-            $fields['SubmitButton'] = "Submit Request";
+                'SubmitButton' => "Submit Request");
 
-            //set additional request headers (were still using the same cURL connection)
-            curl_setopt($ch, CURLOPT_URL, $requestURL);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($fields));
-
-            $result = curl_exec($ch);
+            $result = CURLPost($ch, $requestURL, $fields);
 
             curl_close($ch);
-
+            
+            //Check for string indicating success
             if(stristr($result, "Book Request Received"))
             {
                 $transactionMatches;
@@ -206,4 +159,6 @@ $altRequestMethods = array(
         }
     }
     );
+
+
 ?>

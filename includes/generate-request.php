@@ -1,6 +1,7 @@
 <?php
 //error_reporting(0);
 
+require_once("request-functions.php");
 require_once("./../config.php");
 
 //force HTTPS
@@ -43,7 +44,7 @@ if(!empty($_SESSION['user']) && $_SESSION['user'] == $_REQUEST['user']) {
             MilleniumRequest($isbn, $requestURL); 
         }
         else {
-            call_user_func($altRequestMethods[$systems[$system]["request_method"]], $isbn);
+            call_user_func($customRequestMethods[$systems[$system]["request_method"]], $isbn);
         }
     }
 }
@@ -105,7 +106,7 @@ function MilleniumRequest($isbn, $requestURL) {
         }
         if($fallback)
         {
-            call_user_func($altRequestMethods[$fallback], $isbn);
+            call_user_func($customRequestMethods[$fallback], $isbn);
         }
     }
     

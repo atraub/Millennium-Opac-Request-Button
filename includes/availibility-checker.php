@@ -28,6 +28,10 @@
  *		<td>[Availibility]</td>
  * </tr>
  */
+
+require_once("request-functions.php");
+require_once('./../config.php');
+
 error_reporting(0);
 $ret = array("reqStatus" => 'error');
 header('Content-Type: text/javascript', 1);
@@ -53,8 +57,17 @@ if(isset($_GET['isbn'])){
 			if(!empty($localUrl)){
 				$urls["local"] = $localISBNUrl = preg_replace('/\$1/', $isbn, $localUrl);
 			}
-            $urls["nex"] = "http://nexp.iii.com/search~S3?/i$isbn/i$isbn/1,1,1,E/detlframeset&FF=i$isbn&1,1,";
-			$urls["cny"] = "http://connectny.info/search~S0/?searchtype=i&searcharg=$isbn";
+            
+            foreach($systems as $key => $system)
+            {
+                if($system['request_method'] == "millenium")
+                {
+                    $urls[$key] = str_ireplace("$1", $isbn, $system['search_url']);
+                }
+            }
+            
+            //$urls["nex"] = "http://nexp.iii.com/search~S3?/i$isbn/i$isbn/1,1,1,E/detlframeset&FF=i$isbn&1,1,";
+			//$urls["cny"] = "http://connectny.info/search~S0/?searchtype=i&searcharg=$isbn";
 			$ret['urls'] = $urls;
 
 			$ret['records'] = array();

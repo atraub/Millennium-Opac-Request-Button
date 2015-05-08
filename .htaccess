@@ -1,2 +1,3 @@
 RewriteEngine on
 RewriteRule ^(.*)ira-all.js$ $1ira-all.php [NC,L]
+RewriteRule ^(.*)config.js$ $1js-config.php [NC,L]

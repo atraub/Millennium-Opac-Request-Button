@@ -14,6 +14,9 @@ echo <<<HEADER
 * Greg Rozmarynowycz
 */
 HEADER;
+
+require_once("js-config.php");
+
 foreach($scripts as $script)
 {
     echo <<<FILEHEADER

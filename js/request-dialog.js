@@ -86,8 +86,8 @@ RequestDialog.prototype.Init = function(){
     if(typeof(availibilityChecker) != "undefined")
     {
         this.checker = new availibilityChecker({
-            localLibName: "RIT",
-            localSearchURL: "http://albert.rit.edu/search/i?SEARCH=$1",
+            localLibName: local.name,
+            localSearchUrl: local.searchUrl,
             cssPath: null,
             removeDuplicates: true,
             localOnly: false,
@@ -125,95 +125,105 @@ RequestDialog.prototype.Init = function(){
                 $j(".ira-status").hide();
                 var requestService = "";
                 
-                //General request explanation
-                $j("#ira-processing-indicator").before(
-                    //Description and Availibility Information
-                    $j("<p>").text("While this item won't be available for a while from RIT, other libraries we work with have it available, and we can request it from them:"));
-                
-                
-                var ar = analysisResults;
-                //If the items was found through CNY, NEX, or another network where it can be automatically requested
-                if(ar.availItemCount > 0) {
-                    //store request service
-                    reqDialog.requestService = ar.registeredTags[0];
-                    
-                    //sentence structure variables
-                    var libraryPlurality = (ar.libraryCount > 1) ? "ies" : "y";
-                    var networkPlurality = (ar.registeredTags.length > 1) ? "s" : "";
-                    
-                    //scope event variables
-                    var servicePath = this.servicePath;
-                    
-                    //Yields: Available from # other (CNY/NEX/...) librar(y|ies), in about 7-10 days. View Full Availibility Information
-                    $j("#ira-processing-indicator").before(
-                        $j("<p>").html("Available from <b>" + ar.libraryCount + "</b> other " + ar.registeredTags.join("/").toUpperCase() + " librar" + libraryPlurality + ", in about <span class='fullfillment-disclaimer'>7-10</span> days. ")
-                            .append(
-                                $j("<br>"),
-                                $j("<a>")
-                                .html("View Full Availibility Information")
-                                .attr("target","_blank")
-                                .attr("href", "javascript:void(0)")
-                                .click(function(){
-                                    window.open(servicePath + "itemAvailibility.php?isbn=" + isbn + "&title=" + encodeURI(reqDialog.itemTitle), "Item Availibility: " + reqDialog.itemTitle, "width=600, height= 800, location=no");
-                                })));
+                if(data.localAvail)
+                {
+                    $j(".ira-status")
+                        .html("This item is currently available at the " + local.libName + "! The reference librarian (near the circulation desk) can assist you if you need help finding it.")
+                        .addClass("success")
+                        .addClass("result")
+                        .show();
                 }
-                //If it wasn't found anywhere, it will be request through Interlibrary Loan
                 else {
-                    //store request service
-                    reqDialog.requestService = "ill";
-                    
-                    //Yields: Item will be requested through InterlibraryLoan with an estimated fulfillment of 3-7* business days.
+                    //General request explanation
                     $j("#ira-processing-indicator").before(
-                        $j("<p>").append(
-                            "Item will be requested through ",
-                            $j("<a>")
-                                .attr("target","_blank")
-                                .attr("href","https://ill.rit.edu/ILLiad/Logon.html")
-                                .html("Interlibrary Loan"), 
-                            " with an estimated fulfillment of <span class='fullfillment-disclaimer'>3-7<span> business days.")
-                    )
-                }
-                
-                /*
-                 * Append auth form to ensure a valid user before attempting request, and allowing direct POSTing to services
-                 */
-                var showStatus = this.ShowStatus;
-                $j(".ira-dialog-content").append(
+                        //Description and Availibility Information
+                        $j("<p>").text("While this item won't be available for a while from the " + local.libName + ", other libraries we work with have it available, and we can request it from them:"));
 
-                    //Authentication Form
-                    $j("<form>")
-                        .attr("id","ira-auth-form")
-                        .append(
-                            $j("<label>")
-                                .html("RIT Username")
-                                .attr("for","ira-username"),
 
-                            $j("<input>")
-                                .attr("type","text")
-                                .attr("id","ira-username")
-                                .attr("name","un"),
+                    var ar = analysisResults;
+                    //If the items was found through another millenium system where it can be automatically requested
+                    if(ar.availItemCount > 0) {
+                        //store request service
+                        reqDialog.requestService = ar.registeredTags[0];
 
-                            $j("<label>")
-                                .html("Password")
-                                .attr("for","ira-password"),
+                        //sentence structure variables
+                        var libraryPlurality = (ar.libraryCount > 1) ? "ies" : "y";
+                        var networkPlurality = (ar.registeredTags.length > 1) ? "s" : "";
 
-                            $j("<input>")
-                                .attr("type","password")
-                                .attr("id","ira-password")
-                                .attr("name","pw"),
-                            
-                            $j("<button>")
-                                .attr("type","button")
-                                .html("Request Item")
-                                .addClass("ira-req-button")
-                                .click($j.proxy(reqDialog.AuthUser, reqDialog))));
-                $j(".ira-dialog-content input").keyup(function(e){
-                    if(e.keyCode == 13)
-                    {
-                        $j(".ira-req-button").click();
-                        $j(this).focus();
+                        //scope event variables
+                        var servicePath = this.servicePath;
+
+                        //Yields: Available from # other (CNY/NEX/...) librar(y|ies), in about X* days. View Full Availibility Information
+                        $j("#ira-processing-indicator").before(
+                            $j("<p>").html("Available from <b>" + ar.libraryCount + "</b> other " + ar.registeredTags.join("/").toUpperCase() + " librar" + libraryPlurality + ", in about <span class='fullfillment-disclaimer'>" + systems[ar.registeredTags[0]].fulfillment + "</span> days. ")
+                                .append(
+                                    $j("<br>"),
+                                    $j("<a>")
+                                    .html("View Full Availibility Information")
+                                    .attr("target","_blank")
+                                    .attr("href", "javascript:void(0)")
+                                    .click(function(){
+                                        window.open(servicePath + "itemAvailibility.php?isbn=" + isbn + "&title=" + encodeURI(reqDialog.itemTitle), "Item Availibility: " + reqDialog.itemTitle, "width=600, height= 800, location=no");
+                                    })));
                     }
-                });
+                    //If it wasn't found anywhere, it will be request through Interlibrary Loan
+                    else {
+                        //store request service
+                        reqDialog.requestService = local.fallback;
+
+                        //Yields: Item will be requested through [fallback service] with an estimated fulfillment of X* business days.
+                        $j("#ira-processing-indicator").before(
+                            $j("<p>").append(
+                                "Item will be requested through ",
+                                $j("<a>")
+                                    .attr("target","_blank")
+                                    .attr("href",systems[local.fallback].info_url)
+                                    .html(systems[local.fallback].name), 
+                                " with an estimated fulfillment of <span class='fullfillment-disclaimer'>" + systems[local.fallback] + "<span> business days.")
+                        )
+                    }
+
+                    /*
+                     * Append auth form to ensure a valid user before attempting request, and allowing direct POSTing to services
+                     */
+                    var showStatus = this.ShowStatus;
+                    $j(".ira-dialog-content").append(
+
+                        //Authentication Form
+                        $j("<form>")
+                            .attr("id","ira-auth-form")
+                            .append(
+                                $j("<label>")
+                                    .html(local.name + " Username")
+                                    .attr("for","ira-username"),
+
+                                $j("<input>")
+                                    .attr("type","text")
+                                    .attr("id","ira-username")
+                                    .attr("name","un"),
+
+                                $j("<label>")
+                                    .html("Password")
+                                    .attr("for","ira-password"),
+
+                                $j("<input>")
+                                    .attr("type","password")
+                                    .attr("id","ira-password")
+                                    .attr("name","pw"),
+
+                                $j("<button>")
+                                    .attr("type","button")
+                                    .html("Request Item")
+                                    .addClass("ira-req-button")
+                                    .click($j.proxy(reqDialog.AuthUser, reqDialog))));
+                    $j(".ira-dialog-content input").keyup(function(e){
+                        if(e.keyCode == 13)
+                        {
+                            $j(".ira-req-button").click();
+                            $j(this).focus();
+                        }
+                    });
+                }
             },
             isbn: this.isbn
         });

@@ -66,16 +66,15 @@ $j(document).ready(function() {
 function interceptLink(context, isbn, title)
 {
     console.log("checking local item availibility");
-    var altLink = "https://ill.rit.edu/illiad/illiad.dll/OpenURL?sid=ritcatalog&genre=book&title=" + encodeURI(title) + "&atitle=&volume=&part=&issue=&date=&spage=&epage=&isbn=" + encodeURI(isbn) + "&aulast=&aufirst=&espnumber=&LoanPublisher=&LoanPlace=&LoanEdition=";
 
 	//Determine how far in the future the material is due
     var minRemainingDays = 0;
     
     //Millenium generates request links for any item where at least on copy is unavailabe, even it there are copies available 
-    if($j("td:contains('AVAILABLE')", context).length > 0)
+    if($j("td:contains('AVAILABLE')", context).length > 0 && false)
     {
         console.log("hiding unecessary link for: " + isbn);
-        $j("[href*='request~'], [href*='requestbrowse~']", context).hide();
+        //$j("[href*='request~'], [href*='requestbrowse~']", context).hide();
     }
     else {
         //loop through each copy of the item, and calculate the minimum wait time
@@ -113,8 +112,8 @@ function interceptLink(context, isbn, title)
 
                 console.log(isbn + " " +  title);
                 var requestDialog = new RequestDialog({
-                    cssPath: "http://librarydev.rit.edu/depts/assets/AlbertIRA/css/",
-                    servicePath: "https://librarydev.rit.edu/depts/assets/AlbertIRA/",
+                    cssPath: local.servicePath + "css/",
+                    servicePath: local.servicePath,
                     isbn: isbn,
                     itemTitle: title
                 });
