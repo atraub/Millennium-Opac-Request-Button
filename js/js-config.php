@@ -14,7 +14,7 @@ $servicePath = "https://" . $_SERVER['SERVER_NAME'] . implode("/", $servicePathP
 $fallback = array();
 foreach($systems as $key => $system)
 {
-    if($system['fallback'])
+    if(isset($system['fallback']) && $system['fallback'])
     {
         $fallback = $system;   
     }

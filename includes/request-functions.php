@@ -38,8 +38,15 @@ function CURLPost($ch, $url, $data)
     curl_setopt($ch, CURLOPT_REFERER, $url);
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
+    
+    //uncomment to get headers for debugging
+    curl_setopt($ch, CURLINFO_HEADER_OUT, true);
 
-    return curl_exec($ch);
+    $result = curl_exec($ch);
+    
+    echo curl_getinfo($ch, CURLINFO_HEADER_OUT );
+    
+    return $result;
 }
 
 function extractCookies($response)
@@ -51,17 +58,20 @@ function extractCookies($response)
     $cookieMatches;
     preg_match_all('/^Set-Cookie:(.*)/im', $response, $cookieMatches);
     //var_dump($cookieMatches);
-    $cookieString = $cookieMatches[1][0];
-
-    //extract the cookie kes and values
-    $rawCookies;
-    preg_match_all('/(\s?([^;]+)=([^;]+);?)/i', $cookieString, $rawCookies);
-
-    //make an associative array of the cookies
+    
     $cookies = array();
-    for($c = 0; $c < count($rawCookies[2]); $c++)
-    {
-        $cookies[$rawCookies[2][$c]] = $rawCookies[3][$c];
+    for($l = 0; $l < count($cookieMatches[1]); $l++) {
+        $cookieString = $cookieMatches[1][$l];
+
+        //extract the cookie kes and values
+        $rawCookies;
+        preg_match_all('/(\s?([^;]+)=([^;]+);?)/i', $cookieString, $rawCookies);
+
+        //make an associative array of the cookies
+        for($c = 0; $c < count($rawCookies[2]); $c++)
+        {
+            $cookies[$rawCookies[2][$c]] = $rawCookies[3][$c];
+        }
     }
     
     return $cookies;

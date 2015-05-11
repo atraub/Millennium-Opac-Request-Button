@@ -1,3 +1,6 @@
+<?php
+require_once("config.php");
+?>
 <!DOCTYPE html>
 <html>
 	<head>
@@ -8,8 +11,8 @@
             $j = jQuery.noConflict();
 			$j(document).ready(function(){
 				checker = new availibilityChecker({
-					localLibName: "RIT",
-					localSearchUrl: "http://albert.rit.edu/search/i?SEARCH=$1",
+					localLibName: "<?=$local['institution'] ?>",
+					localSearchUrl: "<?=$local['search_url'] ?>",
 					removeDuplicates: true,
 					localOnly: false
 				})

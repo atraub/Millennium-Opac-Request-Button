@@ -1,17 +1,57 @@
 <?php
+/* ===================================================================================
+ * Millennium Item Request Aggregation (MIRA) Config
+ * ===================================================================================
+ * 
+ * Any changes to adapt MIRA to your system should be made here (although you may also
+ * want to tweak the styling some).
+ * 
+ * Authored by: Greg Rozmarynowycz
+ * Rochester Institute of Technology
+ * Date: 5/11/15
+ */
 
-//Info about local library
+/* Login Function
+ * -----------------------------------------------------------------------------------
+ * Modify the below function to integrate with your authentication system
+ */
+function login($username, $password) {
+    
+    $authenticated = false;
+    $dn = 'uid=' . $username . ',ou=people,dc=rit,dc=edu';
+    $domain = 'ldaps://ldap.rit.edu';
+    $connection = ldap_connect($domain);
+    if($connection && !empty($password)) {
+        $authenticated = @ldap_bind($connection, $dn, $password);
+        @ldap_close($connection);
+    }
+    
+    return $authenticated;
+}
+
+/* Local Library & Instituion Information
+ * ------------------------------------------------------------------------------------
+ * Details about your library and institution for the UI and to request items
+ */
 $local = array(
-    "id" => "rit",
+    //Name of your institution
     "institution" => "RIT",
+    //Name of the library
     "lib_name" => "Wallace Library",
+    //URL to search the local catalog by ISBN (use "$1" to indicate where the isbn goes)
     "search_url" => "http://albert.rit.edu/search/i?SEARCH=$1",
-    //request varialbes
+    
+    //request variables - these can be found by inspecting the Millenium request page
+    //The ID of your institution in the Millenium System
     "campus_id" => "rit9",
+    //Where the material goes
     "req_location" => "wcirc",
     );
 
-//Millenium Systems
+/* Millennium Systems
+ * ------------------------------------------------------------------------------------
+ * Other systems to request materials from
+ */
 $systems = array(
     /*
      * abbr:            3-4 letter abbreviation, this will be displayed to user
@@ -19,7 +59,7 @@ $systems = array(
      * search_url:      Catalog search URL format, indicating the position of item ISBN with $1
      * request_url:     Request URL format, indicating the position of item ISBN with $1 (must be secured with SSL)
      * fulfillment:     Number of days the request is expected to take to be completed
-     * request_method:  "millenium", or the key to a custom defined request method (only millenium systems can be checked for availibility)
+     * request_method:  "millennium", or the key to a custom defined request method (only millennium systems can be checked for availibility)
      * fallback:        Indicates which system should be used if the item is not found or if a request fails
      * info_url:        (Only for fallback) URL where user can get more information about the service
      */
@@ -31,7 +71,7 @@ $systems = array(
         "search_url" => "http://connectny.info/search~S0/?searchtype=i&searcharg=$1",
         "request_url" => "https://connectny.info/search~S0?/i$1/i$1/1,1,1,B/request&FF=i$1&1,1,",
         "fulfillment" => "7-10",
-        "request_method" => "millenium"
+        "request_method" => "millennium"
         ),
     "nex" => array(
         "abbr" => "nex",
@@ -39,8 +79,10 @@ $systems = array(
         "search_url" => "http://nexp.iii.com/search~S3?/i$1/i$1/1,1,1,E/detlframeset&FF=i$1&1,1,",
         "request_url" => "https://nexp.iii.com/search~S3?/i$1/i$1/1%2C1%2C1%2CE/request&FF=i$1&1%2C1%2C",
         "fulfillment" => "7-10",
-        "request_method" => "millenium"
+        "request_method" => "millennium"
         ),
+    
+    //Fallback system (non-millennium, needs custom request function)
     "ill" => array(
         "abbr" => "ill",
         "name" => "InterLibrary Loan",

@@ -6,7 +6,7 @@ $scripts = glob("*.js");
 
 echo <<<HEADER
 /*
-* ITEM REQUEST AGGREGATION - JS PROXY
+* MILLENNIUM ITEM REQUEST AGGREGATION - JS PROXY
 * Loads all JavaScript associated with the IRA module
 *
 * RIT Wallace Library

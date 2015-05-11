@@ -1,5 +1,6 @@
 <?php
 //error_reporting(0);
+require_once("../config.php");
 
 //force HTTPS
 if($_SERVER['HTTPS'] != "on")
@@ -41,24 +42,4 @@ if(isset($_REQUEST['un']) && !empty($_REQUEST['un']))
 }
 
 echo "authCallback(" . json_encode(array("status"=>$ret, "reqId" => $_REQUEST['reqId'])) . ")";
-
-/*
- * Help Functions
- */
-
-//Login Function
-function login($username, $password) {
-    
-    $authenticated = false;
-    $dn = 'uid=' . $username . ',ou=people,dc=rit,dc=edu';
-    $domain = 'ldaps://ldap.rit.edu';
-    $connection = ldap_connect($domain);
-    if($connection && !empty($password)) {
-        $authenticated = @ldap_bind($connection, $dn, $password);
-        @ldap_close($connection);
-    }
-    
-    return $authenticated;
-}
-
 ?>

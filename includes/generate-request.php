@@ -37,11 +37,11 @@ if(!empty($_SESSION['user']) && $_SESSION['user'] == $_REQUEST['user']) {
         $isbn = trim(stripslashes($_REQUEST['isbn']));
         $requestURL = str_ireplace("$1", $isbn, $systems[$system]["request_url"]);
 
-        $system = "ill";
+        //$system = "ill";
         //Create request
-        if($systems[$system]["request_method"] == "millenium")
+        if($systems[$system]["request_method"] == "millennium")
         {
-            MilleniumRequest($isbn, $requestURL); 
+            MillenniumRequest($isbn, $requestURL); 
         }
         else {
             call_user_func($customRequestMethods[$systems[$system]["request_method"]], $isbn);
@@ -52,20 +52,31 @@ if(!empty($_SESSION['user']) && $_SESSION['user'] == $_REQUEST['user']) {
 echo "requestCallback(".json_encode($ret).")";
 
 
-function MilleniumRequest($isbn, $requestURL) {
-    global $local, $ret;
+function MillenniumRequest($isbn, $requestURL) {
+    global $local, $ret, $systems, $customRequestMethods;
     
-    $fields = array();
-    $fields['extpatid'] = $_REQUEST['user'];
-    //$fields['extpatpw'] = $_REQUEST['password'];
-    $fields['extpatpw'] = "asdfa";
-    $fields['name'] = "";
-    $fields['code'] = "";
-    $fields['pin'] = "";
-    $fields['campus'] = $local['campus_id'];
-    $fields['loc'] = $local['req_location'];
-    $fields['pat_submit'] = "xxx";
-
+    $ch = openCURLRequest();
+    $result = CURLPost($ch, $requestURL, array('campus' => $local['campus_id']));
+    
+    //make sure we got a session ID back
+    $cookies = extractCookies($result);
+    if(!empty($cookies['III_SESSION_ID']))
+    {
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array("Cookie: III_ENCORE_PATRON=connectny.info"));
+        
+         $fields = array(
+        'extpatid' => $_REQUEST['user'],
+        'extpatpw' => $_REQUEST['password']."x",
+        'name' => "",
+        'code' => "",
+        'pin' => "",
+        'campus' => $local['campus_id'],
+        'loc' => $local['req_location'],
+        'pat_submit' => "xxx");
+        
+        $result = CURLPost($ch, $requestURL, $fields);
+    }
+    
     $options = array(
         'http' => array(
             'header' => "Content-type: application/x-www-form-urlencoded",
@@ -75,17 +86,19 @@ function MilleniumRequest($isbn, $requestURL) {
         ),
     );
 
-    echo http_build_query($fields);
+    //echo http_build_query($fields);
 
-    $context = stream_context_create($options);
-    $result = file_get_contents($requestURL, false, $context);
+    //$context = stream_context_create($options);
+    //$result = file_get_contents($requestURL, false, $context);
+    
+    //echo $requestURL;
 
     //parse response
     if(stristr($result, "ID number is not valid")) {
         $ret['status'] = "error";
         $ret['error'] = "Could not authenticate with the request server";
     }
-    elseif(stristr($result, "success string")) {
+    elseif(stristr($result, "Item requested from")) {
         $ret['status'] = "complete";
     }
     else {
@@ -97,7 +110,7 @@ function MilleniumRequest($isbn, $requestURL) {
     if($ret['status'] == "error")
     {
         $fallback = false;
-        foreach($system as $key => $system)
+        foreach($systems as $key => $system)
         {
             if(isset($system['fallback']))
             {

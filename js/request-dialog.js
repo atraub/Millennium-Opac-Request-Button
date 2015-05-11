@@ -19,12 +19,12 @@ function RequestDialog(params) {
     this.requestService = null;
     
     //if the stylesheet doesn't exist, pull it in
-    if(!$j("style[href*='ira-dailog.css']").length > 0)
+    if(!$j("style[href*='mira-dailog.css']").length > 0)
     {
         $j("<link>")
             .attr("type","text/css")
             .attr("rel","stylesheet")
-            .attr("href",this.cssPath+"ira-dialog.css?v="+Math.random()%1000)
+            .attr("href",this.cssPath+"mira-dialog.css?v="+Math.random()%1000)
             .appendTo("head")
             .load((function(dialog){
                 return function() {
@@ -266,7 +266,7 @@ RequestDialog.prototype.AuthUser = function() {
     var reqId = parseInt(Math.random() * 1000);
     window[reqId] = this;
     console.log(this.isbn);
-    $j.getJSON(this.servicePath + "includes/ldap-auth.php?callback=?", {reqId: reqId, un: $j("#ira-username").val(), pw: $j("#ira-password").val()}, function(){alert("test");});
+    $j.getJSON(this.servicePath + "includes/auth.php?callback=?", {reqId: reqId, un: $j("#ira-username").val(), pw: $j("#ira-password").val()}, function(){alert("test");});
 }
 
 RequestDialog.prototype.GenerateRequest = function() {

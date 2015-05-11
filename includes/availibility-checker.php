@@ -60,7 +60,7 @@ if(isset($_GET['isbn'])){
             
             foreach($systems as $key => $system)
             {
-                if($system['request_method'] == "millenium")
+                if($system['request_method'] == "millennium")
                 {
                     $urls[$key] = str_ireplace("$1", $isbn, $system['search_url']);
                 }
