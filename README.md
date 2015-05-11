@@ -13,7 +13,6 @@ safely passed to the chosen partner system
 These components are all presented through a simple, user-friendly dialog, that allows the patron to request an item by
 authenticating on a single screen, without ever leaving the original catalog page.
 
-==
 # Configuration
 
 MIRA includes options to for configuration on any system, contained in the **config.php** file.
@@ -23,3 +22,10 @@ MIRA includes options to for configuration on any system, contained in the **con
 
 Besides setting these options, you will need a PHP authenication function that accepts a username and password and returns a boolean value to indicate whether a user entered valid credentials.
 
+# Setup
+
+Using MIRA on your catalog page requires a single script tag on the catalog/item pages:
+
+`<script src="https://[path to MIRA]/MIRA-INIT"></script>`
+
+MIRA is structured to handle cross-server requests, and doesn't have to be hosted on the same server as the catalog (it does require HTTPS though).
