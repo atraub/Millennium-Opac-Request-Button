@@ -15,7 +15,7 @@ authenticating on a single screen, without ever leaving the original catalog pag
 
 # Configuration
 
-MIRA includes options to for configuration on any system, contained in the **config.php** file.
+MIRA includes options for configuration on any Millennium system, contained in the **config.php** file.
 
 - **Local Library Information**: Information about the library and institution where the application is being hosted.
 - **Systems**: List of systems to check for item availibility and make requests from. Includes Millenium systems and ability to inlcude custom functionality for other systems
