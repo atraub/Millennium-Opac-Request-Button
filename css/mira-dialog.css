@@ -126,3 +126,10 @@
     background: #ffa36f;
     transition: all .5s;
 }
+p.ira-server-error {
+    font-size: .9em;
+    color: #c00;
+    background: #ccc;
+    padding: .5em;
+    margin: .5em -.5em;
+}

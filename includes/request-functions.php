@@ -12,13 +12,18 @@ function openCURLRequest()
         CURLOPT_MAXREDIRS      => 10,       /* stop after 10 redirects */
         CURLOPT_SSL_VERIFYHOST => 0,
         CURLOPT_SSL_VERIFYPEER => 0,
-        CURLOPT_COOKIEJAR      => "cookie.txt",
+        //CURLOPT_COOKIEFILE     => dirname(__FILE__)."/cookie.txt",
+        CURLOPT_COOKIEJAR      => dirname(__FILE__)."/cookie.txt",
         //were going to be acting as a Firefox client to eliminate any possible issues
         CURLOPT_USERAGENT      => 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:31.0) Gecko/20100101 Firefox/31.0'
     );
 
     $ch = curl_init();
     curl_setopt_array($ch, $curl_options);
+    
+    //echo "cURL cookie file: \r\n";
+    //echo dirname(__FILE__)."/cookie.txt";
+    //echo file_get_contents(dirname(__FILE__)."/cookie.txt");
     
     return $ch;
 }
@@ -44,7 +49,7 @@ function CURLPost($ch, $url, $data)
 
     $result = curl_exec($ch);
     
-    echo curl_getinfo($ch, CURLINFO_HEADER_OUT );
+    //echo curl_getinfo($ch, CURLINFO_HEADER_OUT );
     
     return $result;
 }

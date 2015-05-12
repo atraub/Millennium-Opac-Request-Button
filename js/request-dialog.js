@@ -179,7 +179,7 @@ RequestDialog.prototype.Init = function(){
                                     .attr("target","_blank")
                                     .attr("href",systems[local.fallback].info_url)
                                     .html(systems[local.fallback].name), 
-                                " with an estimated fulfillment of <span class='fullfillment-disclaimer'>" + systems[local.fallback] + "<span> business days.")
+                                " with an estimated fulfillment of <span class='fullfillment-disclaimer'>" + systems[local.fallback].fulfillment + "<span> business days.")
                         )
                     }
 
@@ -346,6 +346,7 @@ function requestCallback(data) {
     $j(".ira-status")
         .attr("class","ira-status")
         .addClass("result");
+    var instr = "<p> You can attempt to create the request again through this dialog, or directly request the material from " + data.system
     switch(data.status)
     {
         case "complete":
@@ -371,12 +372,12 @@ function requestCallback(data) {
             break;
         case "error":
             $j('.ira-status')
-                .html("An error has occured creating your request: " + data.error + " If this issue persists please contact the system administrator.")
+                .html("An error has occured creating your request: <p class='ira-server-error'>" + data.error + instr + " <p>If this issue persists please contact the system administrator.")
                 .addClass("error");
             break;
         default:
             $j(".ira-status")
-                .html("An unexpected error has occured. Please contact the system administrator is this issue persists")
+                .html("An unexpected error has occured. Please contact the system administrator is this issue persists" + instr)
                 .addClass("error");
             break;
     }

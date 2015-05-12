@@ -11,6 +11,27 @@
  * Date: 5/11/15
  */
 
+/* Local Library & Instituion Information
+ * ------------------------------------------------------------------------------------
+ * Details about your library and institution for the UI and to request items
+ */
+$local = array(
+    //Name of your institution
+    "institution" => "RIT",
+    //Name of the library
+    "lib_name" => "Wallace Library",
+    //URL to search the local catalog by ISBN (use "$1" to indicate where the isbn goes)
+    "search_url" => "http://albert.rit.edu/search/i?SEARCH=$1",
+    
+    //request variables - these can be found by inspecting the Millenium request page
+    //These must be valid to complete a request
+    
+    //The ID of your institution in the Millenium System
+    "campus_id" => "9ritu",
+    //Where the material goes
+    "req_location" => "wcirc",
+    );
+
 /* Login Function
  * -----------------------------------------------------------------------------------
  * Modify the below function to integrate with your authentication system
@@ -29,32 +50,13 @@ function login($username, $password) {
     return $authenticated;
 }
 
-/* Local Library & Instituion Information
- * ------------------------------------------------------------------------------------
- * Details about your library and institution for the UI and to request items
- */
-$local = array(
-    //Name of your institution
-    "institution" => "RIT",
-    //Name of the library
-    "lib_name" => "Wallace Library",
-    //URL to search the local catalog by ISBN (use "$1" to indicate where the isbn goes)
-    "search_url" => "http://albert.rit.edu/search/i?SEARCH=$1",
-    
-    //request variables - these can be found by inspecting the Millenium request page
-    //The ID of your institution in the Millenium System
-    "campus_id" => "rit9",
-    //Where the material goes
-    "req_location" => "wcirc",
-    );
-
 /* Millennium Systems
  * ------------------------------------------------------------------------------------
  * Other systems to request materials from
  */
 $systems = array(
     /*
-     * abbr:            3-4 letter abbreviation, this will be displayed to user
+     * abbr:            3-4 letter abbreviation (this will be displayed to user)
      * name:            Full Name of Service
      * search_url:      Catalog search URL format, indicating the position of item ISBN with $1
      * request_url:     Request URL format, indicating the position of item ISBN with $1 (must be secured with SSL)
@@ -65,6 +67,14 @@ $systems = array(
      */
     
     //key must be the same as the abbreviation
+     "nex" => array(
+        "abbr" => "nex",
+        "name" => "New England Express",
+        "search_url" => "http://nexp.iii.com/search~S3?/i$1/i$1/1,1,1,E/detlframeset&FF=i$1&1,1,",
+        "request_url" => "https://nexp.iii.com/search~S3?/i$1/i$1/1%2C1%2C1%2CE/request&FF=i$1&1%2C1%2C",
+        "fulfillment" => "7-10",
+        "request_method" => "millennium"
+        ),
     "cny" => array(
         "abbr" => "cny",
         "name" => "Connect NY",
@@ -73,14 +83,7 @@ $systems = array(
         "fulfillment" => "7-10",
         "request_method" => "millennium"
         ),
-    "nex" => array(
-        "abbr" => "nex",
-        "name" => "New England Express",
-        "search_url" => "http://nexp.iii.com/search~S3?/i$1/i$1/1,1,1,E/detlframeset&FF=i$1&1,1,",
-        "request_url" => "https://nexp.iii.com/search~S3?/i$1/i$1/1%2C1%2C1%2CE/request&FF=i$1&1%2C1%2C",
-        "fulfillment" => "7-10",
-        "request_method" => "millennium"
-        ),
+   
     
     //Fallback system (non-millennium, needs custom request function)
     "ill" => array(
@@ -93,12 +96,15 @@ $systems = array(
         )
     );
 
-
-/*This array defines alternate functions to request materials*/
+/* Custom Request Methods
+ * ------------------------------------------------------------------------------------
+ * This array defines alternate functions to request materials
+ */
 $customRequestMethods = array(
     /*Authenticates and creates request with the RIT IDS Illiad portal*/
     "illiad" => function($isbn) {
         global $ret;
+        $ret['system'] = "InterLibrary Loan";
     
         /*
          * Set options and initialize cURL request
@@ -156,7 +162,7 @@ $customRequestMethods = array(
                 'LoanDate' => "",
                 'LoanEdition' => "",
                 'DocumentType' => "Book",
-                //'ISSN' = $isbn;
+                'ISSN' => $isbn,
 
                 //Request Information
                 'CitedPages' => "No",
@@ -166,7 +172,7 @@ $customRequestMethods = array(
                 'AcceptAlternateEditition' => "Yes",
                 'GISTWeb.AlternativeFormat' => "No",
                 'GISTWeb.Importance' => "Unsure",
-                'Notes' => "TEST REQUEST - Generated through Albert Item Request Aggregation",
+                'Notes' => "TEST REQUEST - Generated through Millennium Item Request Aggregation",
 
                 'SubmitButton' => "Submit Request");
 

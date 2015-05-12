@@ -2,6 +2,7 @@
 //error_reporting(0);
 
 require_once("request-functions.php");
+require_once("cookie-write.php");
 require_once("./../config.php");
 
 //force HTTPS
@@ -57,46 +58,36 @@ function MillenniumRequest($isbn, $requestURL) {
     
     $ch = openCURLRequest();
     $result = CURLPost($ch, $requestURL, array('campus' => $local['campus_id']));
+    $cookies = extractCookies($result);
+    curl_close($ch);
     
     //make sure we got a session ID back
-    $cookies = extractCookies($result);
     if(!empty($cookies['III_SESSION_ID']))
     {
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array("Cookie: III_ENCORE_PATRON=connectny.info"));
+
+        $cookieWriter = new CookieJarWriter(dirname(__FILE__)."/cookie.txt", "connectny.info");
+        $cookieStatus = $cookieWriter->addCookie("III_ENCORE_PATRON", "connectny.info");
+        //echo $cookieStatus . "\r\n";
         
          $fields = array(
-        'extpatid' => $_REQUEST['user'],
-        'extpatpw' => $_REQUEST['password']."x",
-        'name' => "",
-        'code' => "",
-        'pin' => "",
-        'campus' => $local['campus_id'],
-        'loc' => $local['req_location'],
-        'pat_submit' => "xxx");
+            'extpatid' => $_REQUEST['user'],
+            'extpatpw' => $_REQUEST['password'],
+            'name' => "",
+            'code' => "",
+            'pin' => "",
+            'campus' => $local['campus_id'],
+            'loc' => $local['req_location'],
+            'pat_submit' => "xxx");
         
+        $ch = openCURLRequest();
+        curl_setopt($ch, CURLOPT_COOKIEFILE, dirname(__FILE__)."/cookie.txt");
         $result = CURLPost($ch, $requestURL, $fields);
     }
-    
-    $options = array(
-        'http' => array(
-            'header' => "Content-type: application/x-www-form-urlencoded",
-            'method' => "POST",
-            //'content' => "extpatid=gjr8050&extpatpw=jkd%3Bakasl%3B&name=&code=&pin=&campus=9ritu&loc=wcirc&pat_submit=xxx",
-            'content' => http_build_query($fields)
-        ),
-    );
-
-    //echo http_build_query($fields);
-
-    //$context = stream_context_create($options);
-    //$result = file_get_contents($requestURL, false, $context);
-    
-    //echo $requestURL;
 
     //parse response
     if(stristr($result, "ID number is not valid")) {
         $ret['status'] = "error";
-        $ret['error'] = "Could not authenticate with the request server";
+        $ret['error'] = "Could not authenticate with the " . strtoupper($_REQUEST['system']) . " request server";
     }
     elseif(stristr($result, "Item requested from")) {
         $ret['status'] = "complete";
@@ -119,10 +110,9 @@ function MillenniumRequest($isbn, $requestURL) {
         }
         if($fallback)
         {
-            call_user_func($customRequestMethods[$fallback], $isbn);
+            //call_user_func($customRequestMethods[$fallback], $isbn);
         }
     }
-    
-    echo $result;
+
 }
 ?>
