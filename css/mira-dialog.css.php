@@ -81,12 +81,13 @@ Millenium Item Request Aggregation - Dialog Styling
     background: #fff;
     min-height: 10em;
     margin: .75em 1.5em 1.5em;
+    text-align: center;
 }
 .ira-dialog img {
     padding: 2em;
 }
 .ira-dialog a, .ira-dialog a:visited  {
-    color: <?=$local['dialog_color']?>;
+    color: <?=$local['dialog_color']?> !important;
 }
 .ira-dialog-content p {
     padding: .75em 0;
@@ -122,6 +123,7 @@ Millenium Item Request Aggregation - Dialog Styling
     padding: 1em 0 0;
     border: 1px #ccc solid;
 }
+
 .ira-status.result {
     padding: 1em;
     font-weight: bold;
@@ -135,6 +137,7 @@ Millenium Item Request Aggregation - Dialog Styling
 }
 .ira-status p {
     font-weight: normal;
+    text-align: left;
 }
 .ira-dialog label {
     font-weight: bold;

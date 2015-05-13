@@ -2,8 +2,6 @@
 //error_reporting(0);
 header("Content-type: text/javascript");
 
-$scripts = glob("*.js");
-
 echo <<<HEADER
 /*
 * MILLENNIUM ITEM REQUEST AGGREGATION - JS PROXY
@@ -15,10 +13,15 @@ echo <<<HEADER
 */
 HEADER;
 
-require_once("js-config.php");
-
+$scripts = glob("*.js");
 foreach($scripts as $script)
 {
+    //skip the initializiation script
+    if(stristr($script, "mira-init"))
+    {
+        continue;   
+    }
+    
     echo <<<FILEHEADER
     
 //=========================================================================================

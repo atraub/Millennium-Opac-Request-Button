@@ -16,11 +16,21 @@ Pseudo-Code
             Holds Present:  Direct to Item Requestion Aggregation
 */
 
-var $j = jQuery.noConflict(),
-    MIRA_INTERCEPTED_LINKS,
-    MIRA_DIALOG_OPEN;
+(function(){
+    if(jQuery.isReady)
+    {
+        analyzePage();
+    }
+ })();
 
 $j(document).ready(function(){
+    analyzePage();
+});
+
+function analyzePage()
+{
+    //disable logging ot the console for production version
+    console.log = function() {};
     
     if(!MIRA_INTERCEPTED_LINKS)
     {
@@ -32,7 +42,7 @@ $j(document).ready(function(){
         //don't go any further if there's no request links to intercept
         if(requestLinks && requestLinks.length > 0)
         {
-            console.log("req-links");
+
             //if we have search result cells, intercept the indivual links
             if(recordCells && recordCells.length > 0)
             {
@@ -88,7 +98,6 @@ $j(document).ready(function(){
                 $j(bibInfoRows).each(function(){
                     
                     var labelElem = $j(".bibInfoLabel", $j(this).parent());
-                    console.log("test");
                     if(labelElem.text().toLowerCase().indexOf("title") != -1)
                     {
                         title = $j(this).text();
@@ -105,7 +114,7 @@ $j(document).ready(function(){
             }
         }
     }
-});
+}
 
 function interceptLink(context, isbn, title)
 {
@@ -129,9 +138,10 @@ function interceptLink(context, isbn, title)
                 var dueStamp;
 
                 //extract due date 
-                //if browsers that support it (chrome), automatically extract timestamp
+                //for browsers that support it (chrome), automatically extract timestamp
                 if(!(dueStamp = new Date(dueDate).valueOf()))
                 {
+                    //if not, get it the old way (other browsers)
                     //split up pieces (dd-mm-yy)
                     var datePcs = dueDate.replace("DUE ", "").split("-");
 
@@ -173,9 +183,4 @@ function interceptLink(context, isbn, title)
             });
         }
 	}
-}
-
-function isValidISBN(isbn)
-{
-    
 }

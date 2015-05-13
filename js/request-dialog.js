@@ -88,7 +88,7 @@ RequestDialog.prototype.Init = function(){
         this.checker = new availibilityChecker({
             localLibName: local.name,
             localSearchUrl: local.searchUrl,
-            cssPath: null,
+            cssPath: this.servicePath,
             removeDuplicates: true,
             localOnly: false,
             servicePath: this.servicePath
