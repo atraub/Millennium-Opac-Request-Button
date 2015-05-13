@@ -155,7 +155,7 @@ RequestDialog.prototype.Init = function(){
 
                         //Yields: Available from # other (CNY/NEX/...) librar(y|ies), in about X* days. View Full Availibility Information
                         $j("#ira-processing-indicator").before(
-                            $j("<p>").html("Available from <b>" + ar.libraryCount + "</b> other " + ar.registeredTags.join("/").toUpperCase() + " librar" + libraryPlurality + ", in about <span class='fullfillment-disclaimer'>" + systems[ar.registeredTags[0]].fulfillment + "</span> days. ")
+                            $j("<p>").html("Available from <b>" + ar.libraryCount + "</b> other " + ar.registeredTags.join("/").toUpperCase() + " librar" + libraryPlurality + ", in about <span class='fulfillment-disclaimer'>" + systems[ar.registeredTags[0]].fulfillment + "</span> days. ")
                                 .append(
                                     $j("<br>"),
                                     $j("<a>")
@@ -179,7 +179,7 @@ RequestDialog.prototype.Init = function(){
                                     .attr("target","_blank")
                                     .attr("href",systems[local.fallback].info_url)
                                     .html(systems[local.fallback].name), 
-                                " with an estimated fulfillment of <span class='fullfillment-disclaimer'>" + systems[local.fallback].fulfillment + "<span> business days.")
+                                " with an estimated fulfillment of <span class='fulfillment-disclaimer'>" + systems[local.fallback].fulfillment + "<span> business days.")
                         )
                     }
 
@@ -250,6 +250,7 @@ RequestDialog.prototype.ShowDialog = function() {
 RequestDialog.prototype.CloseDialog = function() {
     $j(".ira-overlay").remove();
     $j(".ira-dialog").remove();
+    MIRA_DIALOG_OPEN = false;
 }
 
 RequestDialog.prototype.ShowStatus = function(status) {

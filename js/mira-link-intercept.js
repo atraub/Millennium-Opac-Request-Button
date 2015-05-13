@@ -16,51 +16,95 @@ Pseudo-Code
             Holds Present:  Direct to Item Requestion Aggregation
 */
 
-var $j = jQuery.noConflict();
+var $j = jQuery.noConflict(),
+    MIRA_INTERCEPTED_LINKS,
+    MIRA_DIALOG_OPEN;
 
-$j(document).ready(function() {
+$j(document).ready(function(){
     
-    //check for search results cells and request links
-    var recordCells = $j("td.briefcitCell");
-    var requestLinks = $j("[href*='request~'], [href*='requestbrowse~']");
-    
-    //don't go any further if there's no request links to intercept
-    if(requestLinks && requestLinks.length > 0)
+    if(!MIRA_INTERCEPTED_LINKS)
     {
-        console.log("req-links");
-        //if we have search result cells, intercept the indivual links
-        if(recordCells && recordCells.length > 0)
+        MIRA_INTERCEPTED_LINKS = true;
+        //check for search results cells and request links
+        var recordCells = $j("td.briefcitCell");
+        var requestLinks = $j("[href*='request~'], [href*='requestbrowse~']");
+
+        //don't go any further if there's no request links to intercept
+        if(requestLinks && requestLinks.length > 0)
         {
-            console.log(recordCells);
-            $j(recordCells).each(function(){
-                //extract record info
-                var isbn = $j(".gbs", this).text().trim().split(" ", 1)[0];
-                var title = $j(".briefcitTitle", this).text().split("/", 1)[0];
-                title = $j.trim(title);
-                
-                var recordReqLinks = $j("[href*='request~'], [href*='requestbrowse~']", this);
-
-                if(isbn && title && recordReqLinks && recordReqLinks.length > 0)
-                {
-                    interceptLink(this, isbn, title);    
-                }
-            });
-        }
-        //otherwise this is a record page and we need can search the whole thing
-        else {
-            console.log("single-page");
-            //extract info
-            var isbn = $j(".bibDisplayContentMore .bibInfoData:first").text();
-            var title = $j(".bibDisplayTitle:first .bibInfoData").text().split("/",1);
-
-            if(isbn && title)
+            console.log("req-links");
+            //if we have search result cells, intercept the indivual links
+            if(recordCells && recordCells.length > 0)
             {
-                interceptLink(document, isbn, title);
-            }
+                console.log(recordCells);
+                $j(recordCells).each(function() {
 
+                    //determine if there any request links to intercept
+                    var recordReqLinks = $j("[href*='request~'], [href*='requestbrowse~']", this);
+
+                    if(recordReqLinks && recordReqLinks.length > 0)
+                    {
+                        //extract record info
+                        var isbn = $j(".gbs", this).text().trim().split(" ", 1)[0];
+
+                        //some record rows don't include the isbn, attempt to extract it from the image url
+                        if(isbn.length < 10)
+                        {
+                            if($j(".briefcitJacket img", this).attr("src"))
+                            {
+                                var urlMatches = $j(".briefcitJacket img", this).attr("src").match(/\?isbn=([\dXx]{10,13})/);
+
+                                if(urlMatches && urlMatches[1])
+                                {
+                                    isbn = urlMatches[1]; 
+                                }    
+                            }
+                            //if still couldn't find an isbn, just take the first ISBN-like # (very low chance this isn't an isbn anyway)
+                            else {
+                                isbn = $j(this).html().match(/([\dXx]{10,13})/g)[0];
+                            }
+                        }
+
+                        //get the title of the item
+                        var title = $j(".briefcitTitle", this).text().split("/", 1)[0];
+                        title = $j.trim(title);
+
+                        if(isbn && title)
+                        {
+                            interceptLink(this, isbn, title);
+                        }
+                    }
+                });
+            }
+            //otherwise this is a record page and we need can search the whole thing
+            else {
+                console.log("single-page");
+                //extract info
+                //var  = $j(".bibInfoData:first").text();
+                var isbn = $j("body").text().match(/([\dXx]{10,13})/g)[0];
+                
+                //if we couldn't get the title that way, try extracting from the bibInfo
+                var bibInfoRows = $j(".bibInfoData");
+                $j(bibInfoRows).each(function(){
+                    
+                    var labelElem = $j(".bibInfoLabel", $j(this).parent());
+                    console.log("test");
+                    if(labelElem.text().toLowerCase().indexOf("title") != -1)
+                    {
+                        title = $j(this).text();
+                    }
+                });
+                    
+                title = title.split("/",1);
+
+                if(isbn && title)
+                {
+                    interceptLink(document, isbn, title);
+                }
+
+            }
         }
     }
-   
 });
 
 function interceptLink(context, isbn, title)
@@ -109,21 +153,29 @@ function interceptLink(context, isbn, title)
         if($j("td:contains('HOLD')", context).text() || minRemainingDays > 4 ){
             console.log("intercepting links");
             $j("[href*='request~'], [href*='requestbrowse~']", context).mouseup(function(){
-
-                console.log(isbn + " " +  title);
-                var requestDialog = new RequestDialog({
-                    cssPath: local.servicePath + "css/",
-                    servicePath: local.servicePath,
-                    isbn: isbn,
-                    itemTitle: title
-                });
-                requestDialog.ShowDialog();
-                requestDialog.Init();
-
+                
+                if(!MIRA_DIALOG_OPEN)
+                {
+                    MIRA_DIALOG_OPEN =  true;
+                    console.log(isbn + " " +  title);
+                    var requestDialog = new RequestDialog({
+                        cssPath: local.servicePath + "css/",
+                        servicePath: local.servicePath,
+                        isbn: isbn,
+                        itemTitle: title
+                    });
+                    requestDialog.ShowDialog();
+                    requestDialog.Init();
+                }
 
             }).click(function(){
                 return false; 
             });
         }
 	}
+}
+
+function isValidISBN(isbn)
+{
+    
 }

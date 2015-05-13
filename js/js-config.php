@@ -7,7 +7,12 @@ header("Content-type: text/javascript");
 $servicePathPcs = explode("/", $_SERVER['REQUEST_URI']);
 //get rit of the filename and js directory
 array_pop($servicePathPcs);
-array_pop($servicePathPcs);
+
+//if they are directly requesting the script, then don't pop off another directory
+if(!stristr($_SERVER['REQUEST_URI'], "MIRA-INIT"))
+{   
+    array_pop($servicePathPcs);
+}
 //combine the pieces together
 $servicePath = "https://" . $_SERVER['SERVER_NAME'] . implode("/", $servicePathPcs) . "/";
 
@@ -23,7 +28,7 @@ foreach($systems as $key => $system)
 $systemsJSON = json_encode($systems);
 
 echo <<<JAVASCRIPT
-//Dynamic Configuration Properties
+//Dynamic Configuration PropertiesX
 local = {
     name: "{$local['institution']}",
     searchUrl: "{$local['search_url']}",

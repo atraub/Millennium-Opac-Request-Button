@@ -12,19 +12,22 @@ if($_SERVER['HTTPS'] != "on")
     exit();
 }
 
-header("Content-type: text/javascript");
 session_start();
+
+//setup our response
+header("Content-type: text/javascript");
 $ret = array("status"=>"not authenticated", "reqId" => $_REQUEST['reqId']);
 
 //ensure the user has been pre-authenticated
 if(!empty($_SESSION['user']) && $_SESSION['user'] == $_REQUEST['user']) {
     $ret['status'] = "no data";
     
+    //checkf or necessary parameters
     if(isset($_REQUEST['isbn']) && isset($_REQUEST['system'])) {
         
         $ret['status'] = "recieved data";
+        
         //Determine which system to request the item from
-
         $system = $_REQUEST['system'];
         
         if(!array_key_exists($system, $systems)) {
@@ -100,6 +103,7 @@ function MillenniumRequest($isbn, $requestURL) {
     //attempt to execute the request through the fallback system
     if($ret['status'] == "error")
     {
+        //determine if a fallback request method is defined
         $fallback = false;
         foreach($systems as $key => $system)
         {
@@ -110,7 +114,7 @@ function MillenniumRequest($isbn, $requestURL) {
         }
         if($fallback)
         {
-            //call_user_func($customRequestMethods[$fallback], $isbn);
+            call_user_func($customRequestMethods[$fallback], $isbn);
         }
     }
 

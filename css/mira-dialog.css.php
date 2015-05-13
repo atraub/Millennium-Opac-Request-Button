@@ -1,3 +1,31 @@
+<?php
+require_once("../config.php");
+
+header("Content-type: text/css");
+
+//calaculate the button hover color
+$colorVals;
+preg_match_all("/\d{1,3}/", $local['dialog_color'], $colorVals);
+$colorVals = array_pop($colorVals);
+
+if(count($colorVals) == 3)
+{
+    list($r, $g, $b) = array_map('intval', $colorVals);
+
+    $r = min(255, $r + 20);
+    $g = min(255, $g + 20);
+    $b = min(255, $b + 20);
+    
+    $highlight_color = "rgb(" . $r . "," . $g . "," . $b . ")";
+}
+else {
+    $highlight_color = $local['dialog_color'];
+}
+?>
+
+/*
+Millenium Item Request Aggregation - Dialog Styling
+*/
 .ira-overlay {
     background: #000;
     opacity: .7;
@@ -57,14 +85,36 @@
 .ira-dialog img {
     padding: 2em;
 }
-.ira-dialog a {
-    color: #f36e24;
+.ira-dialog a, .ira-dialog a:visited  {
+    color: <?=$local['dialog_color']?>;
 }
 .ira-dialog-content p {
     padding: .75em 0;
     margin: 0;
     font-size: 1em;
     text-align: left;
+}
+.ira-dialog .fulfillment-disclaimer {
+    position: relative;
+    display: inline-block;
+}
+.ira-dialog .fulfillment-disclaimer:after {
+    content: "*";
+    color: #f00;
+}
+.ira-dialog .fulfillment-disclaimer:hover:before {
+    content: "This is only an estimate, and your material may arrive faster or more slowly.";
+    display: block;
+    position: absolute;
+    z-index: 10;
+    background: #ddd;
+    color: #222;
+    padding: .5em;
+    border: 1px #aaa solid;
+    left: 0;
+    top: 1.5em;
+    width: 20em;
+    box-shadow: 2px 2px 2px rgba(0,0,0,.3);
 }
 .ira-dialog form, .ira-status.result {
     text-align: left;
@@ -104,11 +154,7 @@
 }
 .ira-req-button {
     display: block;
-    background: #b76300;
-    background-image: -webkit-linear-gradient(#c46a00, #6d3b00);
-    background-image: -o-linear-gradient(#c46a00, #6d3b00);
-    background-image: linear-gradient(#c46a00, #6d3b00);
-    background: #f36e24;
+    background: <?=$local['dialog_color']?>;
     color: #fff;
     padding: .4em 0;
     border: 0;
@@ -122,8 +168,7 @@
     font-weight: bold;
 }
 .ira-req-button:hover {
-    background-image: linear-gradient(#cc842e, #8d5a1f);
-    background: #ffa36f;
+    background: <?=$highlight_color?>;
     transition: all .5s;
 }
 p.ira-server-error {
