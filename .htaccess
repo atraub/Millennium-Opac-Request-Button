@@ -1,0 +1,10 @@
+RewriteEngine on
+
+RewriteRule ^(.*)MIRA-INIT$ $1js/mira-init.js [NC,L]
+RewriteRule ^(.*)MIRA-JS$ $1js/mira-all.php [NC,L]
+RewriteRule ^(.*)config.js$ $1js-config.php [NC,L]
+RewriteRule ^(.*)mira-init.js$ $1mira-init.js.php [NC,L]
+RewriteRule ^(.*)mira-dialog.css$ $1/mira-dialog.css.php [NC,L]
+
+#deprecated MIRA call
+RewriteRule ^(.*)ira-all.js$ $1mira-init.js [NC,L]
