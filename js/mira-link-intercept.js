@@ -160,7 +160,7 @@ function interceptLink(context, isbn, title)
         });
 
         //If the material won't be avialable for more than 4 days (or is already on HOLD)
-        if($j("td:contains('HOLD')", context).text() || minRemainingDays > 4 ){
+        if($j("td:contains('HOLD')", context).text() || "td:contains('MISSING')" || minRemainingDays > 4 ){
             console.log("intercepting links");
             $j("[href*='request~'], [href*='requestbrowse~']", context).mouseup(function(){
                 
